@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.net.URL; // Importación necesaria
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -83,9 +84,16 @@ public class UI extends JFrame {
 	// --- MÉTODOS DE INICIALIZACIÓN ---
 
 	private void inicializarFrame() {
-		// NOTA: Se recomienda cambiar estas rutas absolutas a carga desde classpath.
-		setIconImage(Toolkit.getDefaultToolkit()
-				.getImage("C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\images-removebg-preview.png"));
+		// ¡CORREGIDO! Carga del ícono principal usando el Class Loader.
+		// Asume que images-removebg-preview.png está en la carpeta 'Vista'
+		URL iconURL = getClass().getResource("/Vista/images-removebg-preview.png");
+		if (iconURL != null) {
+			setIconImage(Toolkit.getDefaultToolkit().getImage(iconURL));
+		} else {
+			// Usar un icono por defecto o ignorar si no se encuentra (para evitar fallos)
+			System.err.println("Icono de ventana no encontrado en /Vista/images-removebg-preview.png");
+		}
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 950, 750);
 
@@ -151,12 +159,18 @@ public class UI extends JFrame {
 
 	private void crearCamposYEtiquetasLibro(JPanel panel) {
 
+		// CLASE CORREGIDA: Usa ClassLoader para cargar desde el classpath
 		class IconLabel extends JLabel {
 			public IconLabel(String text, String path) {
 				super(text);
-				ImageIcon icon = new ImageIcon(path);
-				Image img = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-				setIcon(new ImageIcon(img));
+				URL imageURL = getClass().getResource(path);
+				if (imageURL != null) {
+					ImageIcon icon = new ImageIcon(imageURL);
+					Image img = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+					setIcon(new ImageIcon(img));
+				} else {
+					System.err.println("Icono no encontrado en la ruta: " + path);
+				}
 				setHorizontalAlignment(JLabel.RIGHT);
 				setFont(new Font("Tahoma", Font.PLAIN, 18));
 			}
@@ -170,55 +184,42 @@ public class UI extends JFrame {
 			}
 		}
 
-		// NOTA: Rutas absolutas mantenidas para no romper el código original
-
-		// ISBN
-		lblNewLabel_1 = new IconLabel("ISBN:",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\pngtree-isbn-barcodes-vector-png-image_7108020.png");
+		// ISBN - RUTA CORREGIDA
+		lblNewLabel_1 = new IconLabel("ISBN:", "/img/pngtree-isbn-barcodes-vector-png-image_7108020.png");
 		textISBN = new JTextField(20);
 		panel.add(lblNewLabel_1);
 		panel.add(new TextFieldPanel(textISBN));
 
-		// TÍTULO
-		JLabel lblTitulo = new IconLabel("TÍTULO:",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\4693065.png");
+		// TÍTULO - RUTA CORREGIDA
+		JLabel lblTitulo = new IconLabel("TÍTULO:", "/img/4693065.png");
 		textTitulo = new JTextField(20);
 		panel.add(lblTitulo);
 		panel.add(new TextFieldPanel(textTitulo));
 
-		// AUTOR
-		JLabel lblAutor = new IconLabel("AUTOR:",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\17_19005_73815130-b378-4be6-8e8a-cc581811bd54.png");
+		// AUTOR - RUTA CORREGIDA
+		JLabel lblAutor = new IconLabel("AUTOR:", "/img/17_19005_73815130-b378-4be6-8e8a-cc581811bd54.png");
 		textAutor = new JTextField(20);
 		panel.add(lblAutor);
 		panel.add(new TextFieldPanel(textAutor));
 
-		// EDITORIAL
+		// EDITORIAL - RUTA CORREGIDA
 		JLabel lblEditorial = new IconLabel("EDITORIAL:",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\pngtree-editorial-line-icon-vector-png-image_6649706.png");
+				"/img/pngtree-editorial-line-icon-vector-png-image_6649706.png");
 		textEditorial = new JTextField(20);
 		panel.add(lblEditorial);
 		panel.add(new TextFieldPanel(textEditorial));
 
-		// PRECIO
-		JLabel lblPrecio = new IconLabel("PRECIO:",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\126169.png");
+		// PRECIO - RUTA CORREGIDA
+		JLabel lblPrecio = new IconLabel("PRECIO:", "/img/126169.png");
 		textPrecio = new JTextField(20);
 		panel.add(lblPrecio);
 		panel.add(new TextFieldPanel(textPrecio));
 
-		// CANTIDAD
-		JLabel lblCantidad = new IconLabel("CANTIDAD:",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\14184.png");
+		// CANTIDAD - RUTA CORREGIDA
+		JLabel lblCantidad = new IconLabel("CANTIDAD:", "/img/14184.png");
 		textCantidad = new JTextField(20);
 		panel.add(lblCantidad);
 		panel.add(new TextFieldPanel(textCantidad));
-
-		JTextField[] fields = { textISBN, textTitulo, textAutor, textEditorial, textPrecio, textCantidad };
-		for (JTextField field : fields) {
-			field.setBackground(Color.WHITE);
-			field.setForeground(Color.BLACK);
-		}
 	}
 
 	private void inicializarRadioButtons(JPanel panelEstado, JPanel panelFormato) {
@@ -284,33 +285,37 @@ public class UI extends JFrame {
 		JPanel panelBotonesStock = new JPanel();
 		panelBotonesStock.setBackground(new Color(8, 31, 92));
 
+		// CLASE CORREGIDA: Usa ClassLoader para cargar desde el classpath
 		class IconeButton extends JButton {
 			public IconeButton(String text, String path) {
 				super(text);
-				ImageIcon icon = new ImageIcon(path);
-				Image img = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-				setIcon(new ImageIcon(img));
+				URL imageURL = getClass().getResource(path);
+
+				if (imageURL != null) {
+					ImageIcon icon = new ImageIcon(imageURL);
+					Image img = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+					setIcon(new ImageIcon(img));
+				} else {
+					System.err.println("Icono de botón no encontrado en la ruta: " + path);
+				}
 			}
 		}
 
-		// MODIFICAR (Nuevo: por selección, carga datos a pestaña LIBRO)
-		btnModificar = new IconeButton("MODIFICAR",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\2570442.png");
+		// MODIFICAR (Nuevo: por selección, carga datos a pestaña LIBRO) - RUTA
+		// CORREGIDA
+		btnModificar = new IconeButton("MODIFICAR", "/img/2570442.png");
 		panelBotonesStock.add(btnModificar);
 
-		// BORRAR
-		btnBorrar = new IconeButton("BORRAR",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\1345874.png");
+		// BORRAR - RUTA CORREGIDA
+		btnBorrar = new IconeButton("BORRAR", "/img/1345874.png");
 		panelBotonesStock.add(btnBorrar);
 
-		// COMPRAR
-		btnComprar = new IconeButton("COMPRAR",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\2649150.png");
+		// COMPRAR - RUTA CORREGIDA
+		btnComprar = new IconeButton("COMPRAR", "/img/2649150.png");
 		panelBotonesStock.add(btnComprar);
 
-		// VENDER
-		btnVender = new IconeButton("VENDER",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\1992622.png");
+		// VENDER - RUTA CORREGIDA
+		btnVender = new IconeButton("VENDER", "/img/1992622.png");
 		panelBotonesStock.add(btnVender);
 
 		return panelBotonesStock;
@@ -340,28 +345,32 @@ public class UI extends JFrame {
 		JPanel panelGestion = new JPanel();
 		panelGestion.setBackground(new Color(8, 31, 92));
 
+		// CLASE CORREGIDA: Usa ClassLoader para cargar desde el classpath
 		class IconeButton extends JButton {
 			public IconeButton(String text, String path) {
 				super(text);
-				ImageIcon icon = new ImageIcon(path);
-				Image img = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-				setIcon(new ImageIcon(img));
+				URL imageURL = getClass().getResource(path);
+
+				if (imageURL != null) {
+					ImageIcon icon = new ImageIcon(imageURL);
+					Image img = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+					setIcon(new ImageIcon(img));
+				} else {
+					System.err.println("Icono de botón no encontrado en la ruta: " + path);
+				}
 			}
 		}
 
-		// GUARDAR
-		btnGuardar = new IconeButton("GUARDAR",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\4856668.png");
+		// GUARDAR - RUTA CORREGIDA
+		btnGuardar = new IconeButton("GUARDAR", "/img/4856668.png");
 		panelGestion.add(btnGuardar);
 
-		// CONSULTAR
-		btnConsultar = new IconeButton("CONSULTAR",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\4715177.png");
+		// CONSULTAR - RUTA CORREGIDA
+		btnConsultar = new IconeButton("CONSULTAR", "/img/4715177.png");
 		panelGestion.add(btnConsultar);
 
-		// LIMPIAR
-		btnLimpiar = new IconeButton("LIMPIAR",
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\Clean-Download-Transparent-PNG-Image.png");
+		// LIMPIAR - RUTA CORREGIDA
+		btnLimpiar = new IconeButton("LIMPIAR", "/img/Clean-Download-Transparent-PNG-Image.png");
 		panelGestion.add(btnLimpiar);
 
 		return panelGestion;
@@ -374,12 +383,18 @@ public class UI extends JFrame {
 		JPanel panelSalir = new JPanel();
 		panelSalir.setBackground(new Color(8, 31, 92));
 
-		// SALIR
-		ImageIcon iconSalir = new ImageIcon(
-				"C:\\Users\\mario\\OneDrive\\Escritorio\\adelaida\\proyecto1\\img\\salir.png");
-		Image imgSalir = iconSalir.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+		// SALIR - RUTA CORREGIDA (Carga manual sin IconeButton)
+		URL urlSalir = getClass().getResource("/img/salir.png");
 		btnSalir = new JButton("SALIR");
-		btnSalir.setIcon(new ImageIcon(imgSalir));
+
+		if (urlSalir != null) {
+			ImageIcon iconSalir = new ImageIcon(urlSalir);
+			Image imgSalir = iconSalir.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+			btnSalir.setIcon(new ImageIcon(imgSalir));
+		} else {
+			System.err.println("Icono de salir no encontrado en /Controlador/img/salir.png");
+		}
+
 		panelSalir.add(btnSalir);
 
 		return panelSalir;
