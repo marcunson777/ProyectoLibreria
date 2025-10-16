@@ -59,7 +59,20 @@ public class ParaUI extends UI {
 
 				// Lógica de Negocio: Guardar o Actualizar
 				if (libreria.comprobarIsbnExistente(isbnLimpio)) {
-					// Si existe, se actualiza
+					
+					// 🚨 RESTRICCIÓN 1: No se permite cambiar la cantidad al modificar 
+					Libro libroOriginal = libreria.obtenerLibroPorISBN(isbnLimpio);
+					
+					if (libroOriginal != null && libroOriginal.getCantidad() != cantidad) {
+						JOptionPane.showMessageDialog(null, 
+								"ERROR: No se permite cambiar la cantidad de stock (" + libroOriginal.getCantidad() + ") al modificar el libro.\n"
+								+ "Utilice los botones 'Vender' o 'Comprar' en la pestaña LIBRERIA para ajustar el stock.", 
+								"Restricción de Modificación", 
+								JOptionPane.ERROR_MESSAGE);
+						return; // Detiene la actualización
+					}
+					
+					// Si existe, se actualiza (Y la cantidad es la misma)
 					if (libreria.actualizarLibro(isbnLimpio, libro)) {
 						JOptionPane.showMessageDialog(null, "Libro actualizado correctamente", "Éxito",
 								JOptionPane.INFORMATION_MESSAGE);
@@ -161,6 +174,8 @@ public class ParaUI extends UI {
 		});
 
 		// listeners
+
+		// Listener para el campo ISBN (Control de longitud y dígitos)
 		textISBN.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -185,7 +200,40 @@ public class ParaUI extends UI {
 				}
 			}
 		});
-
+		
+		// Listener para el campo CANTIDAD (Solo permite dígitos)
+		textCantidad.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				char c = e.getKeyChar();
+				// Solo permite dígitos (0-9) y la tecla de retroceso (borrar)
+				if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) {
+					e.consume(); // Consume (ignora) el evento de la tecla
+				}
+			}
+		});
+		
+		// 🆕 Listener para el campo PRECIO (Solo permite dígitos y un punto decimal)
+		textPrecio.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				char c = e.getKeyChar();
+				String textoActual = textPrecio.getText();
+				
+				// Permitir solo dígitos, el punto decimal (.), y la tecla de borrado (backspace)
+				if (!Character.isDigit(c) && c != '.' && c != KeyEvent.VK_BACK_SPACE) {
+					e.consume(); // Ignora cualquier otra cosa (letras, símbolos)
+					return;
+				}
+				
+				// Restringir el punto decimal: solo permitirlo si no existe ya uno
+				if (c == '.') {
+					if (textoActual.contains(".")) {
+						e.consume(); // Si ya hay un punto, ignora el nuevo punto
+					}
+				}
+			}
+		});
 	}
 
 	// Control de Visibilidad de Botones
@@ -389,6 +437,9 @@ public class ParaUI extends UI {
 		textISBN.setForeground(Color.RED);
 		rdbtnCartone.setSelected(true); // Seleccionar por defecto
 		buttonNovedad.setSelected(true); // Seleccionar por defecto
+		
+		// 🚨 RESTRICCIÓN 2: Habilitar la edición de la cantidad para agregar un nuevo libro
+		textCantidad.setEditable(true);
 	}
 
 	private void handleCargarDatosDesdeObjeto(Libro libro) {
@@ -399,7 +450,9 @@ public class ParaUI extends UI {
 		textPrecio.setText(String.valueOf(libro.getPrecio()));
 		textCantidad.setText(String.valueOf(libro.getCantidad()));
 
-		// Forzamos color verde en ISBN cargado para que el usuario sepa que está bien
+		// 🚨 RESTRICCIÓN 2: Deshabilitar la edición de la cantidad al modificar
+		textCantidad.setEditable(false);
+
 		textISBN.setForeground(Color.GREEN);
 
 		seleccionarRadioButton(libro.getFormato(), libro.getEstado());

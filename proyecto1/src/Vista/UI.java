@@ -86,12 +86,11 @@ public class UI extends JFrame {
 	private void inicializarFrame() {
 		// ¡CORREGIDO! Carga del ícono principal usando el Class Loader.
 		// Asume que images-removebg-preview.png está en la carpeta 'Vista'
-		URL iconURL = getClass().getResource("/Vista/images-removebg-preview.png");
+		URL iconURL = getClass().getResource("/img/images-removebg-preview.png");
 		if (iconURL != null) {
 			setIconImage(Toolkit.getDefaultToolkit().getImage(iconURL));
 		} else {
-			// Usar un icono por defecto o ignorar si no se encuentra (para evitar fallos)
-			System.err.println("Icono de ventana no encontrado en /Vista/images-removebg-preview.png");
+			System.err.println("Icono de ventana no encontrado en //images-removebg-preview.png");
 		}
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -376,9 +375,6 @@ public class UI extends JFrame {
 		return panelGestion;
 	}
 
-	/**
-	 * Crea el panel con el botón SALIR (universal).
-	 */
 	private JPanel crearPanelBotonSalir() {
 		JPanel panelSalir = new JPanel();
 		panelSalir.setBackground(new Color(8, 31, 92));
