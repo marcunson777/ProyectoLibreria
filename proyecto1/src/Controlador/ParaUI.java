@@ -60,19 +60,15 @@ public class ParaUI extends UI {
 				// Lógica de Negocio: Guardar o Actualizar
 				if (libreria.comprobarIsbnExistente(isbnLimpio)) {
 					
-					// 🚨 RESTRICCIÓN 1: No se permite cambiar la cantidad al modificar 
-					Libro libroOriginal = libreria.obtenerLibroPorISBN(isbnLimpio);
+					// 🚨 NUEVA RESTRICCIÓN: El ISBN no puede cambiar al modificar
+					// Necesitamos el ISBN original para saber si es una modificación del ISBN
+					// Como el campo textISBN está deshabilitado, el isbnLimpio es el ISBN original.
+					// Este check es más bien una defensa extra, ya que la UI lo impide.
+					// Si hubieras usado un campo oculto con el ISBN original, la lógica sería diferente.
+					// Aquí, simplemente procedemos con la actualización, ya que la inmodificabilidad
+					// del ISBN se maneja principalmente en la capa de la UI (ver handleCargarDatosDesdeObjeto).
 					
-					if (libroOriginal != null && libroOriginal.getCantidad() != cantidad) {
-						JOptionPane.showMessageDialog(null, 
-								"ERROR: No se permite cambiar la cantidad de stock (" + libroOriginal.getCantidad() + ") al modificar el libro.\n"
-								+ "Utilice los botones 'Vender' o 'Comprar' en la pestaña LIBRERIA para ajustar el stock.", 
-								"Restricción de Modificación", 
-								JOptionPane.ERROR_MESSAGE);
-						return; // Detiene la actualización
-					}
-					
-					// Si existe, se actualiza (Y la cantidad es la misma)
+					// Si existe, se actualiza
 					if (libreria.actualizarLibro(isbnLimpio, libro)) {
 						JOptionPane.showMessageDialog(null, "Libro actualizado correctamente", "Éxito",
 								JOptionPane.INFORMATION_MESSAGE);
@@ -213,7 +209,7 @@ public class ParaUI extends UI {
 			}
 		});
 		
-		// 🆕 Listener para el campo PRECIO (Solo permite dígitos y un punto decimal)
+		// Listener para el campo PRECIO (Solo permite dígitos y un punto decimal)
 		textPrecio.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -438,8 +434,9 @@ public class ParaUI extends UI {
 		rdbtnCartone.setSelected(true); // Seleccionar por defecto
 		buttonNovedad.setSelected(true); // Seleccionar por defecto
 		
-		// 🚨 RESTRICCIÓN 2: Habilitar la edición de la cantidad para agregar un nuevo libro
-		textCantidad.setEditable(true);
+		// Re-habilitar edición para el nuevo libro
+		textISBN.setEditable(true);
+		textCantidad.setEditable(true); // Cantidad ahora es modificable
 	}
 
 	private void handleCargarDatosDesdeObjeto(Libro libro) {
@@ -450,8 +447,11 @@ public class ParaUI extends UI {
 		textPrecio.setText(String.valueOf(libro.getPrecio()));
 		textCantidad.setText(String.valueOf(libro.getCantidad()));
 
-		// 🚨 RESTRICCIÓN 2: Deshabilitar la edición de la cantidad al modificar
-		textCantidad.setEditable(false);
+		// 🚨 NUEVO: Deshabilitar el ISBN al modificar
+		textISBN.setEditable(false);
+		
+		// Revertido: Habilitar la edición de la cantidad
+		textCantidad.setEditable(true); 
 
 		textISBN.setForeground(Color.GREEN);
 
